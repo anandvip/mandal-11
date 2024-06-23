@@ -3,69 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meditation Tracker - Robust Timer</title>
+    <title>Meditation Tracker</title>
     <style>
-        body, html {
+        body {
             font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
             margin: 0;
             padding: 0;
-            height: 100%;
             background-color: #f4f4f4;
         }
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
             padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 20px;
         }
-        .dashboard, .session-log, .notes-section {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        header {
+            background: #35424a;
+            color: #ffffff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #e8491d 3px solid;
         }
-      .session-log{
-        margin-top:50px
-      }
+        header h1 {
+            margin: 0;
+            text-align: center;
+        }
         .dashboard {
-            background-color: #070707;
-            color: #f9f9f9;
-            position: sticky;
-            top: 20px;
-            align-self: start;
-        }
-        h2 {
-            margin-top: 0;
+            background: #ffffff;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         .progress-bar {
             width: 100%;
-            height: 20px;
             background-color: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-top: 10px;
+            padding: 3px;
+            border-radius: 3px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, .2);
         }
-        #progressBar {
-            height: 100%;
-            background-color: #7a4caf;
-            width: 0%;
-            transition: width 0.5s ease;
+        .progress-bar-fill {
+            display: block;
+            height: 22px;
+            background-color: #659cef;
+            border-radius: 3px;
+            transition: width 500ms ease-in-out;
         }
-        [contenteditable="true"] {
-            border: 1px dashed #ccc;
-            padding: 4px;
-            background-color: rgba(255, 255, 255, 0.1);
+        .session-log {
+            margin-top: 20px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         .session-entry {
-            padding: 10px;
-            border-bottom: 1px solid #e0e0e0;
+            border-bottom: 1px solid #ccc;
+            padding: 10px 0;
         }
-        .session-notes {
+        button {
+            background-color: #35424a;
+            color: #ffffff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #e8491d;
+        }
+        input[type="text"], input[type="date"] {
             width: 100%;
-            padding: 5px;
-            margin-top: 5px;
+            padding: 8px;
+            margin: 5px 0 20px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
         }
         .modal {
             display: none;
@@ -75,7 +91,8 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
         }
         .modal-content {
             background-color: #fefefe;
@@ -84,6 +101,7 @@
             border: 1px solid #888;
             width: 80%;
             max-width: 500px;
+            border-radius: 5px;
         }
         .close {
             color: #aaa;
@@ -92,553 +110,214 @@
             font-weight: bold;
             cursor: pointer;
         }
-        .timer-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .timer-display {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-        .toast {
-            visibility: hidden;
-            min-width: 250px;
-            margin-left: -125px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 2px;
-            padding: 16px;
-            position: fixed;
-            z-index: 1;
-            left: 50%;
-            bottom: 30px;
-            font-size: 17px;
-        }
-        .toast.show {
-            visibility: visible;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
-        @keyframes fadein {
-            from {bottom: 0; opacity: 0;}
-            to {bottom: 30px; opacity: 1;}
-        }
-        @keyframes fadeout {
-            from {bottom: 30px; opacity: 1;}
-            to {bottom: 0; opacity: 0;}
-        }
-        button {
-            background-color: #7a4caf;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
+        .close:hover,
+        .close:focus {
+            color: black;
             text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
             cursor: pointer;
-            border-radius: 5px;
         }
-        input[type="date"], input[type="time"] {
-            padding: 5px;
-            border-radius: 3px;
-            border: 1px solid #ccc;
-        }
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-            .dashboard {
-                position: static;
-            }
-        }
-      .contrl{
-        display:flex;
-        background-color:#070707;
-          place-content:space-around;
-        border-radius:5px;
-        padding:10px;
-        position:fixed;
-        top:20px;
-        left:480px
-      }
     </style>
 </head>
 <body>
+    <header>
+        <div class="container">
+            <h1>Meditation Tracker</h1>
+        </div>
+    </header>
+
     <div class="container">
         <div class="dashboard">
-            <h2>Mandal Dashboard</h2>
-            <p>Today's Date & Time: <span id="currentDateTime"></span></p>
-            <p>Your Name: <span id="userName" contenteditable="true"></span></p>
-            <p>Mandal Name: <span id="mandalaNameDashboard" contenteditable="true"></span></p>
-            <p>Duration: 48 days</p>
-            <p>Start Date: <input type="date" id="startDateInput"></p>
-            <p>End Date: <span id="endDateDashboard"></span></p>
-            <p>Days Completed: <span id="daysCompleted"></span></p>
-            <p>Remaining Days: <span id="remainingDays"></span></p>
-            <p>Sessions Completed: <span id="sessionsCompletedDashboard"></span></p>
-            <p>Mandals Completed: <span id="mandalsCompleted" contenteditable="true"></span></p>
+            <h2>Current Mandala: <span id="currentMandalName">None</span></h2>
+            <p>Progress: <span id="progressText">0/0</span> sessions</p>
             <div class="progress-bar">
-                <div id="progressBar"></div>
+                <span class="progress-bar-fill" style="width: 0%;"></span>
             </div>
-            <button id="createSessionBtn">New Session</button>
-            <button id="createPastSessionBtn">Add Past</button>
-            <button id="deleteMandalBtn">Delete Mandal</button>
+            <p>Start Date: <span id="startDate">Not set</span></p>
+            <p>End Date: <span id="endDate">Not set</span></p>
+            <button id="newSessionBtn">New Session</button>
+            <button id="newMandalaBtn">New Mandala</button>
         </div>
-        <div class="main-content">
-            <div class="session-log">
-                <h2>Your Meditation History</h2>
-                <p>Here, you can view your past meditation sessions. It's a record of your journey & commitment towards mindfulness.</p>
-              <section class="contrl">
-                <button id="selectAllSessionsBtn">Select All</button>
-                <button id="deleteSelectedSessionsBtn">Delete Selected</button>
-                <button id="sortSessionsByMorningBtn">Sort Morning</button>
-                <button id="sortSessionsByEveningBtn">Sort Evening</button>
-                <button id="sortSessionsByDateBtn">Sort by Date</button>
-                </section>
-                <div id="sessionLog"></div>
-            </div>
-            <div class="notes-section">
-                <h2>Meditation Notes</h2>
-                <div id="notesSection"></div>
-                <button id="exportNotesBtn">Export Notes</button>
-            </div>
+
+        <div class="session-log">
+            <h2>Session Log</h2>
+            <div id="sessionContainer"></div>
         </div>
     </div>
 
-    <div id="countdownModal" class="modal">
+    <div id="newMandalaModal" class="modal">
         <div class="modal-content">
-            <span class="close" id="closeCountdownModalBtn">&times;</span>
-            <h2>Session Timer</h2>
-            <div class="timer-container">
-                <div class="timer-display" id="timerDisplay">13:00</div>
-                <div class="timer-controls">
-                    <button id="increaseTimeBtn">+</button>
-                    <button id="decreaseTimeBtn">-</button>
-                    <button id="startTimerBtn">Start</button>
-                    <button id="stopTimerBtn">Stop</button>
-                    <button id="closeTimerBtn">Close</button>
-                </div>
-            </div>
+            <span class="close">&times;</span>
+            <h2>Create New Mandala</h2>
+            <form id="newMandalaForm">
+                <label for="mandalaName">Mandala Name:</label>
+                <input type="text" id="mandalaName" required>
+                <label for="mandalaStartDate">Start Date:</label>
+                <input type="date" id="mandalaStartDate" required>
+                <button type="submit">Create</button>
+            </form>
         </div>
     </div>
 
-    <div id="pastSessionModal" class="modal">
+    <div id="newSessionModal" class="modal">
         <div class="modal-content">
-            <span class="close" id="closePastSessionModalBtn">&times;</span>
-            <h2>Add Past Sessions</h2>
-            <p>Select the date and times for the past sessions:</p>
-            <label for="pastSessionDate">Date:</label>
-            <input type="date" id="pastSessionDate">
-            <label for="morningSessionTime">Morning Session Time:</label>
-            <input type="time" id="morningSessionTime">
-            <label for="eveningSessionTime">Evening Session Time:</label>
-            <input type="time" id="eveningSessionTime">
-            <button id="savePastSessionsBtn">Save</button>
+            <span class="close">&times;</span>
+            <h2>New Meditation Session</h2>
+            <p id="timerDisplay">13:00</p>
+            <button id="startTimerBtn">Start</button>
+            <button id="stopTimerBtn">Stop</button>
+            <textarea id="sessionNotes" placeholder="Session notes..." rows="4" cols="50"></textarea>
         </div>
     </div>
-
-    <div id="toast" class="toast"></div>
 
     <script>
-        // Web Worker for robust timer
-        const timerWorker = new Worker(URL.createObjectURL(new Blob([`
-            let timerInterval;
-            let endTime;
+        // Meditation Tracker App
+        const MeditationTracker = {
+            activeMandala: null,
+            timerInterval: null,
+            timerDuration: 13 * 60, // 13 minutes in seconds
 
-            self.onmessage = function(e) {
-                if (e.data.action === 'start') {
-                    endTime = Date.now() + e.data.duration;
-                    timerInterval = setInterval(() => {
-                        const remainingTime = Math.max(0, endTime - Date.now());
-                        self.postMessage({ remainingTime });
-                        if (remainingTime === 0) {
-                            clearInterval(timerInterval);
-                            self.postMessage({ completed: true });
+            init() {
+                this.loadMandala();
+                this.updateDashboard();
+                this.displaySessionLog();
+                this.attachEventListeners();
+            },
+
+            loadMandala() {
+                const storedMandala = localStorage.getItem('activeMandala');
+                if (storedMandala) {
+                    this.activeMandala = JSON.parse(storedMandala);
+                }
+            },
+
+            saveMandala() {
+                localStorage.setItem('activeMandala', JSON.stringify(this.activeMandala));
+            },
+
+            updateDashboard() {
+                if (this.activeMandala) {
+                    document.getElementById('currentMandalName').textContent = this.activeMandala.name;
+                    document.getElementById('progressText').textContent = `${this.activeMandala.sessions.length}/96`;
+                    document.getElementById('startDate').textContent = new Date(this.activeMandala.startDate).toLocaleDateString();
+                    document.getElementById('endDate').textContent = new Date(this.activeMandala.endDate).toLocaleDateString();
+                    
+                    const progress = (this.activeMandala.sessions.length / 96) * 100;
+                    document.querySelector('.progress-bar-fill').style.width = `${progress}%`;
+                } else {
+                    document.getElementById('currentMandalName').textContent = 'None';
+                    document.getElementById('progressText').textContent = '0/0';
+                    document.getElementById('startDate').textContent = 'Not set';
+                    document.getElementById('endDate').textContent = 'Not set';
+                    document.querySelector('.progress-bar-fill').style.width = '0%';
+                }
+            },
+
+            displaySessionLog() {
+                const container = document.getElementById('sessionContainer');
+                container.innerHTML = '';
+                if (this.activeMandala) {
+                    this.activeMandala.sessions.forEach((session, index) => {
+                        const sessionElement = document.createElement('div');
+                        sessionElement.classList.add('session-entry');
+                        sessionElement.innerHTML = `
+                            <h3>Session ${index + 1}</h3>
+                            <p>Date: ${new Date(session.date).toLocaleDateString()}</p>
+                            <p>Duration: ${session.duration} minutes</p>
+                            <p>Notes: ${session.notes}</p>
+                        `;
+                        container.appendChild(sessionElement);
+                    });
+                }
+            },
+
+            attachEventListeners() {
+                document.getElementById('newMandalaBtn').addEventListener('click', () => this.showModal('newMandalaModal'));
+                document.getElementById('newSessionBtn').addEventListener('click', () => this.showModal('newSessionModal'));
+                document.getElementById('newMandalaForm').addEventListener('submit', (e) => this.createNewMandala(e));
+                document.getElementById('startTimerBtn').addEventListener('click', () => this.startTimer());
+                document.getElementById('stopTimerBtn').addEventListener('click', () => this.stopTimer());
+                document.querySelectorAll('.close').forEach(el => {
+                    el.addEventListener('click', () => this.hideModals());
+                });
+            },
+
+            showModal(modalId) {
+                document.getElementById(modalId).style.display = 'block';
+            },
+
+            hideModals() {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            },
+
+            createNewMandala(e) {
+                e.preventDefault();
+                const name = document.getElementById('mandalaName').value;
+                const startDate = new Date(document.getElementById('mandalaStartDate').value);
+                const endDate = new Date(startDate);
+                endDate.setDate(endDate.getDate() + 47); // 48 days including start date
+
+                this.activeMandala = {
+                    name,
+                    startDate,
+                    endDate,
+                    sessions: []
+                };
+
+                this.saveMandala();
+                this.updateDashboard();
+                this.hideModals();
+            },
+
+            startTimer() {
+                if (!this.timerInterval) {
+                    this.timerInterval = setInterval(() => {
+                        this.timerDuration--;
+                        this.updateTimerDisplay();
+                        if (this.timerDuration <= 0) {
+                            this.stopTimer();
+                            this.completeSession();
                         }
                     }, 1000);
-                } else if (e.data.action === 'stop') {
-                    clearInterval(timerInterval);
                 }
-            };
-        `], {type: 'text/javascript'})));
+            },
 
-        // Global variables
-        let activeMandal = JSON.parse(localStorage.getItem('activeMandal')) || {
-            name: '',
-            startDate: '',
-            endDate: '',
-            totalSessions: 96,
-            sessions: []
-        };
-        let timerDuration = 13 * 60 * 1000; // 13 minutes in milliseconds
+            stopTimer() {
+                clearInterval(this.timerInterval);
+                this.timerInterval = null;
+            },
 
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', initializeApp);
-        document.getElementById('userName').addEventListener('blur', saveUserName);
-        document.getElementById('mandalaNameDashboard').addEventListener('blur', saveMandalaName);
-        document.getElementById('startDateInput').addEventListener('change', setStartDate);
-        document.getElementById('mandalsCompleted').addEventListener('blur', saveMandalsCompleted);
-        document.getElementById('createSessionBtn').addEventListener('click', createSession);
-        document.getElementById('createPastSessionBtn').addEventListener('click', showPastSessionModal);
-        document.getElementById('deleteMandalBtn').addEventListener('click', deleteMandal);
-        document.getElementById('selectAllSessionsBtn').addEventListener('click', selectAllSessions);
-        document.getElementById('deleteSelectedSessionsBtn').addEventListener('click', deleteSelectedSessions);
-        document.getElementById('sortSessionsByMorningBtn').addEventListener('click', () => sortSessionsByType('morning'));
-        document.getElementById('sortSessionsByEveningBtn').addEventListener('click', () => sortSessionsByType('evening'));
-        document.getElementById('sortSessionsByDateBtn').addEventListener('click', sortSessionsByDate);
-        document.getElementById('exportNotesBtn').addEventListener('click', exportNotes);
-        document.getElementById('startTimerBtn').addEventListener('click', startTimer);
-        document.getElementById('stopTimerBtn').addEventListener('click', stopTimer);
-        document.getElementById('closeCountdownModalBtn').addEventListener('click', closeCountdownModal);
-        document.getElementById('savePastSessionsBtn').addEventListener('click', savePastSessions);
-        document.getElementById('closePastSessionModalBtn').addEventListener('click', closePastSessionModal);
-        document.getElementById('increaseTimeBtn').addEventListener('click', () => adjustTimer(1));
-        document.getElementById('decreaseTimeBtn').addEventListener('click', () => adjustTimer(-1));
-        document.getElementById('closeTimerBtn').addEventListener('click', closeTimer);
+            updateTimerDisplay() {
+                const minutes = Math.floor(this.timerDuration / 60);
+                const seconds = this.timerDuration % 60;
+                document.getElementById('timerDisplay').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            },
 
-        timerWorker.onmessage = function(e) {
-            if (e.data.remainingTime !== undefined) {
-                updateTimerDisplay(e.data.remainingTime);
-            }
-            if (e.data.completed) {
-                completeCurrentSession();
-                showToast("Meditation session completed!");
-            }
-        };
-
-        // Utility functions
-        function showToast(message) {
-            const toast = document.getElementById("toast");
-            toast.textContent = message;
-            toast.className = "toast show";
-            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
-        }
-
-        function formatDate(date) {
-            return new Date(date).toLocaleDateString('en-GB');
-        }
-
-        // Core functions
-        function initializeApp() {
-            console.log("Initializing app...");
-            updateDashboard();
-            displaySessionLog();
-            const storedUserName = localStorage.getItem('userName');
-            if (storedUserName) {
-                document.getElementById('userName').textContent = storedUserName;
-            }
-            const storedMandalsCompleted = localStorage.getItem('mandalsCompleted');
-            if (storedMandalsCompleted) {
-                document.getElementById('mandalsCompleted').textContent = storedMandalsCompleted;
-            }
-        }
-
-        function saveUserName() {
-            const userName = document.getElementById('userName').textContent.trim();
-            localStorage.setItem('userName', userName);
-            updateDashboard();
-        }
-
-        function saveMandalaName() {
-            const mandalaName = document.getElementById('mandalaNameDashboard').textContent.trim();
-            activeMandal.name = mandalaName;
-            updateActiveMandal();
-        }
-
-        function setStartDate() {
-            const startDate = document.getElementById('startDateInput').value;
-            activeMandal.startDate = startDate;
-            activeMandal.endDate = calculateEndDate(startDate, 48); // 48 days duration
-            updateActiveMandal();
-        }
-
-        function calculateEndDate(startDate, duration) {
-            const start = new Date(startDate);
-            start.setDate(start.getDate() + duration);
-            return start.toISOString().split('T')[0];
-        }
-
-        function saveMandalsCompleted() {
-            const mandalsCompleted = document.getElementById('mandalsCompleted').textContent.trim();
-            localStorage.setItem('mandalsCompleted', mandalsCompleted);
-            updateDashboard();
-        }
-
-        function createSession() {
-            if (!activeMandal.name || !activeMandal.startDate) {
-                showToast('Please set Mandal name and start date first.');
-                return;
-            }
-            const currentDate = new Date();
-            const startDate = new Date(activeMandal.startDate);
-            const timeDiff = currentDate - startDate;
-            const sessionsCompleted = calculateSessionsCompleted(timeDiff);
-
-            if (sessionsCompleted >= activeMandal.totalSessions) {
-                showToast('All sessions for this Mandal have been completed.');
-                return;
-            }
-
-            const sessionType = sessionsCompleted % 2 === 0 ? 'morning' : 'evening';
-            const session = {
-                type: sessionType,
-                startTime: currentDate.toLocaleTimeString(),
-                endTime: null,
-                completed: false,
-                notes: "",
-                date: currentDate.toISOString()
-            };
-            activeMandal.sessions.push(session);
-            updateActiveMandal();
-          showCountdownModal();
-        }
-
-        function showPastSessionModal() {
-            document.getElementById("pastSessionModal").style.display = "block";
-        }
-
-        function closePastSessionModal() {
-            document.getElementById("pastSessionModal").style.display = "none";
-        }
-
-        function savePastSessions() {
-            try {
-                const pastSessionDate = new Date(document.getElementById('pastSessionDate').value);
-                const morningSessionTime = document.getElementById('morningSessionTime').value;
-                const eveningSessionTime = document.getElementById('eveningSessionTime').value;
-
-                if (!pastSessionDate || !morningSessionTime || !eveningSessionTime) {
-                    showToast('Please fill in all fields.');
-                    return;
-                }
-
-                const startDate = new Date(activeMandal.startDate);
-                const timeDiff = pastSessionDate - startDate;
-                const sessionsCompleted = calculateSessionsCompleted(timeDiff);
-
-                if (sessionsCompleted >= activeMandal.totalSessions) {
-                    showToast('Cannot add more sessions. All sessions for this Mandal have been completed.');
-                    return;
-                }
-
-                const morningSessionDateTime = new Date(`${pastSessionDate.toISOString().split('T')[0]}T${morningSessionTime}`);
-                const eveningSessionDateTime = new Date(`${pastSessionDate.toISOString().split('T')[0]}T${eveningSessionTime}`);
-
-                const morningSession = createSessionObject('morning', morningSessionDateTime);
-                const eveningSession = createSessionObject('evening', eveningSessionDateTime);
-
-                activeMandal.sessions.push(morningSession, eveningSession);
-                activeMandal.sessions.sort((a, b) => new Date(a.date) - new Date(b.date));
-                updateActiveMandal();
-                showToast('Past sessions saved successfully.');
-                closePastSessionModal();
-            } catch (error) {
-                showToast('Failed to save past sessions.');
-                console.error('Error saving past sessions:', error);
-            }
-        }
-
-        function createSessionObject(type, dateTime) {
-            return {
-                type: type,
-                startTime: dateTime.toLocaleTimeString(),
-                endTime: new Date(dateTime.getTime() + timerDuration).toLocaleTimeString(),
-                completed: true,
-                notes: "",
-                date: dateTime.toISOString()
-            };
-        }
-
-        function showCountdownModal() {
-            document.getElementById("countdownModal").style.display = "block";
-        }
-
-        function closeCountdownModal() {
-            document.getElementById("countdownModal").style.display = "none";
-            stopTimer();
-        }
-
-        function startTimer() {
-            timerWorker.postMessage({ action: 'start', duration: timerDuration });
-            document.getElementById('startTimerBtn').disabled = true;
-            document.getElementById('stopTimerBtn').disabled = false;
-        }
-
-        function stopTimer() {
-            timerWorker.postMessage({ action: 'stop' });
-            document.getElementById('startTimerBtn').disabled = false;
-            document.getElementById('stopTimerBtn').disabled = true;
-        }
-
-        function closeTimer() {
-            stopTimer();
-            updateTimerDisplay(timerDuration);
-            closeCountdownModal();
-        }
-
-        function adjustTimer(minutes) {
-            timerDuration += minutes * 60 * 1000;
-            if (timerDuration < 0) timerDuration = 0;
-            updateTimerDisplay(timerDuration);
-        }
-
-        function updateTimerDisplay(remainingTime) {
-            const minutes = Math.floor(remainingTime / 60000);
-            const seconds = Math.floor((remainingTime % 60000) / 1000);
-            document.getElementById('timerDisplay').textContent = 
-                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        function completeCurrentSession() {
-            const currentSession = activeMandal.sessions[activeMandal.sessions.length - 1];
-            currentSession.endTime = new Date().toLocaleTimeString();
-            currentSession.completed = true;
-            updateActiveMandal();
-            closeCountdownModal();
-        }
-
-        function updateActiveMandal() {
-            localStorage.setItem('activeMandal', JSON.stringify(activeMandal));
-            updateDashboard();
-            displaySessionLog();
-        }
-
-        function calculateSessionsCompleted(timeDiff) {
-            const daysCompleted = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-            const remainingHours = (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
-            return Math.min(daysCompleted * 2 + (remainingHours >= 12 ? 1 : 0), activeMandal.totalSessions);
-        }
-
-        function updateDashboard() {
-            const userName = localStorage.getItem('userName') || 'Your Name';
-            const mandalaName = activeMandal.name || 'No Mandala Name';
-            const startDate = new Date(activeMandal.startDate);
-            const endDate = new Date(activeMandal.endDate);
-            const currentDate = new Date();
-            const timeDiff = currentDate - startDate;
-            const daysCompleted = Math.max(0, Math.floor(timeDiff / (1000 * 60 * 60 * 24)));
-            const remainingDays = Math.max(0, 48 - daysCompleted);
-            const sessionsCompleted = calculateSessionsCompleted(timeDiff);
-            const totalSessions = activeMandal.totalSessions;
-
-            // Update progress bar
-            const progressPercentage = (sessionsCompleted / totalSessions) * 100;
-            document.getElementById('progressBar').style.width = `${progressPercentage}%`;
-
-            // Update other dashboard elements
-            document.getElementById('currentDateTime').textContent = currentDate.toLocaleString();
-            document.getElementById('mandalaNameDashboard').textContent = mandalaName;
-            document.getElementById('userName').textContent = userName;
-            document.getElementById('startDateInput').value = startDate.toISOString().split('T')[0];
-            document.getElementById('endDateDashboard').textContent = endDate.toDateString();
-            document.getElementById('daysCompleted').textContent = daysCompleted;
-            document.getElementById('remainingDays').textContent = remainingDays;
-            document.getElementById('sessionsCompletedDashboard').textContent = `${sessionsCompleted} / ${totalSessions}`;
-
-            console.log(`Progress: ${progressPercentage.toFixed(2)}% (${sessionsCompleted}/${totalSessions} sessions)`);
-        }
-
-        function displaySessionLog() {
-            const sessionLog = document.getElementById('sessionLog');
-            sessionLog.innerHTML = '';
-           
-            activeMandal.sessions.forEach((session, index) => {
-                const sessionEntry = document.createElement('div');
-                sessionEntry.classList.add('session-entry');
-                sessionEntry.innerHTML = `
-                    <input type="checkbox" class="session-checkbox" data-index="${index}">
-                    <label>
-                        <h3>Session ${index + 1} (${session.type})</h3>
-                        <p>Date: ${formatDate(session.date)}</p>
-                        <p>Start Time: ${session.startTime || 'Not started'}</p>
-                        <p>End Time: ${session.endTime || 'Not ended'}</p>
-                        <p>Completed: ${session.completed ? 'Yes' : 'No'}</p>
-                        <textarea class="session-notes" data-index="${index}">${session.notes || ''}</textarea>
-                    </label>
-                `;
-                sessionLog.appendChild(sessionEntry);
-            });
-
-            // Add event listeners for session notes
-            document.querySelectorAll('.session-notes').forEach(noteElement => {
-                noteElement.addEventListener('blur', saveSessionNotes);
-            });
-        }
-
-        function saveSessionNotes(event) {
-            try {
-                const index = event.target.dataset.index;
-                activeMandal.sessions[index].notes = event.target.value.trim();
-                updateActiveMandal();
-                showToast(`Session notes saved successfully.`);
-            } catch (error) {
-                showToast(`Failed to save session notes.`);
-                console.error('Error saving session notes:', error);
-            }
-        }
-
-        function selectAllSessions() {
-            const checkboxes = document.querySelectorAll('.session-checkbox');
-            checkboxes.forEach(checkbox => checkbox.checked = true);
-        }
-
-        function deleteSelectedSessions() {
-            const checkboxes = document.querySelectorAll('.session-checkbox:checked');
-            const indexesToDelete = Array.from(checkboxes).map(cb => parseInt(cb.dataset.index));
-            activeMandal.sessions = activeMandal.sessions.filter((_, index) => !indexesToDelete.includes(index));
-            updateActiveMandal();
-        }
-
-        function sortSessionsByType(type) {
-            activeMandal.sessions.sort((a, b) => {
-                if (a.type === type && b.type !== type) return -1;
-                if (a.type !== type && b.type === type) return 1;
-                return new Date(a.date) - new Date(b.date);
-            });
-            updateActiveMandal();
-        }
-
-        function sortSessionsByDate() {
-            activeMandal.sessions.sort((a, b) => new Date(a.date) - new Date(b.date));
-            updateActiveMandal();
-        }
-
-        function exportNotes() {
-            const exportData = activeMandal.sessions.map((session, index) => `
-                <h3>Session ${index + 1} (${session.type})</h3>
-                <p>Date: ${formatDate(session.date)}</p>
-                <p>Start Time: ${session.startTime}</p>
-                <p>End Time: ${session.endTime}</p>
-                <p>Notes: ${session.notes}</p>
-            `).join('');
-            const exportBlob = new Blob([exportData], { type: 'text/html' });
-            const exportUrl = URL.createObjectURL(exportBlob);
-            const a = document.createElement('a');
-            a.href = exportUrl;
-            a.download = `${activeMandal.name}_notes.html`;
-            a.click();
-            URL.revokeObjectURL(exportUrl);
-        }
-
-        function deleteMandal() {
-            if (confirm("Are you sure you want to delete the current mandala?")) {
-                localStorage.removeItem('activeMandal');
-                activeMandal = {
-                    name: '',
-                    startDate: '',
-                    endDate: '',
-                    sessions: [],
-                    totalSessions: 96
+            completeSession() {
+                const notes = document.getElementById('sessionNotes').value;
+                const newSession = {
+                    date: new Date(),
+                    duration: 13,
+                    notes: notes
                 };
-                updateActiveMandal();
-                showToast("Mandala deleted successfully.");
-            }
-        }
+                this.activeMandala.sessions.push(newSession);
+                this.saveMandala();
+                this.updateDashboard();
+                this.displaySessionLog();
+                this.hideModals();
+                this.resetTimer();
+            },
 
-        // Initialize the app
-        initializeApp();
+            resetTimer() {
+                this.timerDuration = 13 * 60;
+                this.updateTimerDisplay();
+            }
+        };
+
+        // Initialize the app when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => MeditationTracker.init());
     </script>
 </body>
 </html>
